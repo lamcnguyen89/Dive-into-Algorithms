@@ -41,3 +41,32 @@ plt.xlabel('Horizontal Position of Ball')
 plt.ylabel('Vertical Position of Ball')
 plt.plot(xs,ys,xs2,ys2,xs3,ys3,xs4,ys4)
 plt.show()
+
+# The trajectory of a hypothetical thrown ball, with a line segment representing the outfielder looking at the ball as it travels and line segments A an B showing the lengths whose ratio constitutes the tangent we are interested in
+
+xs5 = [0.3, 0.3]
+ys5 = [0, ball_trajectory(0.3)]
+xs6 = [0.3,2]
+ys6 = [0,0]
+plt.title('The Trajectory of a Thrown Ball - Tangent Calculator')
+plt.xlabel('Horizontal Position of the Ball')
+plt.ylabel('Vertical Position of the Ball')
+plt.plot(xs,ys,xs4,ys4,xs5,ys5,xs6,ys6)
+plt.text(0.31,ball_trajectory(0.3)/2, 'A',fontsize=16)
+plt.text((0.3 + 2)/2,0.05, 'B', fontsize=16)
+plt.show()
+
+# Page 09: Chapman's Solution to Algorithmically catching a ball is that when the catcher is standing in the correct location to catch the ball, the angle of the head tilt of the catcher as he watches the ball grows at a simple and constant rate
+
+"""
+Chapman's Algorithm for Catching a Ball:
+
+    1. Observe the acceleration of the  tangent of the angle between the ground and your line of sight with the ball.
+    2. If the acceleration is positive, step backward.
+    3. If the acceleration is negative, step forward.
+    4. Repeat step 1 and 2 until the catcher is standing in the correct location to catch.
+    5. Catch it.
+"""
+"""
+Algorithm: A set of instructions to produce a predefined outcome
+"""
