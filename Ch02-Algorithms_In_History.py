@@ -71,4 +71,10 @@ def gcd(x,y):
     if(remainder != 0):
         return(gcd(smaller,remainder))
     
+"""
+Page 22 Japanese Magic Square
+"""
+
+# A magic square  is an array of unique, consecutive natural numbers such that all rows, all the columns, and both the main diagonals have the same sum.
+
 
