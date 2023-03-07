@@ -56,12 +56,13 @@ def plot_triangle_simple(triangle, thename):
 
     ax.margins(0.1)
     pl.scatter(xs,ys)
+    pl.title(str(thename))
     pl.savefig(str(thename)+'.png')
     pl.show()
     pl.close()
 
 # Show the plot:
-plot_triangle_simple(points_to_triangle((0.2,0.8),(0.5,0.2),(0.8,0.7)),'triangle1')
+plot_triangle_simple(points_to_triangle((0.2,0.8),(0.5,0.2),(0.8,0.7)),'Triangle 1')
 
 
 # It will also come in handy to to have a function that calculates the distance between any two points:
@@ -116,7 +117,7 @@ def plot_triangle(triangles, centers, radii, thename):
 
         ax.add_artist(circle)
 
-
+    pl.title(str(thename))
     pl.savefig(str(thename)+'.png')
     pl.show()
     pl.close()
@@ -127,7 +128,7 @@ triangle1 = points_to_triangle((0.1,0.1),(0.3,0.6),(0.5,0.2))
 center1,radius1 = triangle_to_circumcenter(triangle1)
 triangle2 = points_to_triangle((0.8,0.1),(0.7,0.5),(0.8,0.9))
 center2,radius2 = triangle_to_circumcenter(triangle2)
-plot_triangle([triangle1,triangle2],[center1,center2],[radius1,radius2],'Two_Triangles_One_Graph')
+plot_triangle([triangle1,triangle2],[center1,center2],[radius1,radius2],'Two Triangles One Graph')
 
 
 """
@@ -160,12 +161,12 @@ def gen_delaunay(points):
     delaunay = [points_to_triangle([-5,-5],[-5,10],[10,-5])]
     number_of_points = 0
 
-    while number_of_points < len(points):
+    while number_of_points < len(points): # For every point, it creates a list of invalid triangles: Every triangle that's in the DT whose circumcircle  includes the point we're currently looking at.
         point_to_add = points[number_of_points]
         
         delaunay_index = 0
 
-        invalid_triangles = []
+        invalid_triangles = [] # Removes those invalid triangles from the DT and creates a collectionof poinrs using each point that was in those invalid triangles.
         while delaunay_index < len(delaunay):
             circumcenter,radius = triangle_to_circumcenter(delaunay[delaunay_index])
             new_distance = get_distance(circumcenter, point_to_add)
@@ -173,15 +174,15 @@ def gen_delaunay(points):
                 invalid_triangles.append(delaunay[delaunay_index])
             delaunay_index += 1
 
-        points_in_invalid = []
+        points_in_invalid = [] # Then, using those points, it adds new triangles that follow the rules of Delaunay triangulations.
         for i in range(0,len(invalid_triangles)):
             delaunay.remove(invalid_triangles[i])
-            for j in range(0,len(invalid_triangles)):
+            for j in range(0,len(invalid_triangles[i])):
                 points_in_invalid.append(invalid_triangles[i][j])
-        points_in_invalid = [list(x) for x in set(tuple(x)) for x in points_in_invalid]
+        points_in_invalid = [list(x) for x in set(tuple(x) for x in points_in_invalid)]
 
-        for i in range(0, len(points_in_invalid)):
-            for j in range(0,len(points_in_invalid)):
+        for i in range(0, len(points_in_invalid)): # It accomplishes this incrementally, using exactly the code that we have already introduced. Finally it returns a delaunay, a list containing the collection of trianglesthat constitutes our DT.
+            for j in range(i+1,len(points_in_invalid)):
                 # Count the number of times both of these are in the bad triangles
                 count_occurences = 0
                 for k in range(0, len(invalid_triangles)):
@@ -195,4 +196,102 @@ def gen_delaunay(points):
         
 
 
+# In the following code, we specify a number for N and this generates random points (x and y values). Then we zip the x and y values, put them together in a list, pass them to our gen_delaunay() function and get back a full DT:
 
+N = 15
+import numpy as np
+np.random.seed(5201314)
+xs = np.random.rand(N)
+ys = np.random.rand(N)
+points = zip(xs,ys)
+listpoints = list(points)
+the_delaunay = gen_delaunay(listpoints) # We can use this delaunay to generate a Voronoi diagram.
+
+
+"""
+PAGE 143: From Delaunay to Voronoi
+
+We can generate a Voronoi Diagram by following this Algorithm:
+
+1. Find the DT of a set of points.
+2. Take the circumcenter of every triangle in the DT.
+3. Draw lines connecting the circumcenters of all triangles in the DT that share an edge.
+
+"""
+
+# Before Creating the Voronoi Diagram, let's add some extra functionality to the plotting function:
+
+def plot_triangle_circum(triangles, centers,plotcircles,plotpoints,plottriangles,plotvoronoi,plotvpoints, thename):
+    fig, ax = pl.subplots()
+    ax.set_xlim([-0.1,1.1])
+    ax.set_ylim([-0.1,1.1])
+
+    lines = []
+    for i in range(0,len(triangles)):
+        triangle = triangles[i]
+        center = centers[i][0]
+        radius = centers[i][1]
+        itin = [0,1,2,0]
+        thelines = gen_lines(triangle, itin)
+        xs = [triangle[0][0],triangle[1][0],triangle[2][0]]
+        ys = [triangle[0][1],triangle[1][1],triangle[2][1]]
+
+        lc = mc.LineCollection(gen_lines(triangle,itin),linewidths=2)
+        if(plottriangles):
+            ax.add_collection(lc)
+        if(plotpoints):
+            pl.scatter(xs,ys)
+
+        ax.margins(0.1)
+
+        if(plotvpoints):
+            pl.scatter(center[0],center[1])
+        
+        circle = pl.Circle(center, radius, color = 'b', fill = False)
+        if(plotcircles):
+            ax.add_artist(circle)
+
+        if(plotvoronoi):
+            for j in range(0, len(triangles)):
+                commonpoints = 0
+                for k in range(0, len(triangles[i])):
+                    for n in range(0,len(triangles[j])):
+                        if triangles[i][k] == triangles[j][n]:
+                            commonpoints += 1
+                if commonpoints == 2:
+                    lines.append([list(centers[i][0]),list(centers[j][0])])
+
+        
+        lc = mc.LineCollection(lines,linewidths = 1)
+
+        ax.add_collection(lc)
+
+    pl.title(str(thename))
+    pl.savefig(str(thename)+'.png')
+    pl.show()
+    pl.close()
+
+
+
+# We're almost ready to call this plotting function and see our final Voronoi Diagram. However we first need to get the circumcenters of every triangle in our DT. We can create an empty list called circumceters and append the circumcenter of every triangle in our DT:
+
+circumcenters = []
+for i in range(0,len(the_delaunay)):
+    circumcenters.append(triangle_to_circumcenter(the_delaunay[i]))
+
+
+
+# Finally we call the plotting function, specifying that we want to draw the Voronoi Boundaries:
+plot_triangle_circum(the_delaunay,circumcenters,False,True,False,True,False, 'Final Voronoi Diagram')
+
+
+# Graph with all the parameters set to True:
+plot_triangle_circum(the_delaunay,circumcenters,True,True,True,True,True, 'Everything and Voronoi Diagram')
+
+
+"""
+PAGE 144: Summary
+
+Voronoi Diagrams can be used for many purposes such as Water pumps, post office placement, crystal structures, bomb blast radius planning, etc...
+
+"""
