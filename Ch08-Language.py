@@ -146,6 +146,27 @@ print(textnew)
 
 import re
 import numpy as np
+import nltk
+nltk.download('brown')
+
+from nltk.corpus import brown
+wordlist = set(brown.words())
+word_list = list(wordlist)
+
+word_list = [word.replace('*','') for word in word_list]
+word_list = [word.replace('[','') for word in word_list]
+word_list = [word.replace(']','') for word in word_list]
+word_list = [word.replace('?','') for word in word_list]
+word_list = [word.replace('.','') for word in word_list]
+word_list = [word.replace('+','') for word in word_list]
+word_list = [word.replace('/','') for word in word_list]
+word_list = [word.replace(';','') for word in word_list]
+word_list = [word.replace(':','') for word in word_list]
+word_list = [word.replace(',','') for word in word_list]
+word_list = [word.replace(')','') for word in word_list]
+word_list = [word.replace('(','') for word in word_list]
+word_list.remove('')
+
 
 def insertspaces(text,word_list):
 
@@ -172,7 +193,75 @@ def insertspaces(text,word_list):
     return(textnew)
 
 # Now we can define any text and call our function as follows:
-text = "The oneperfectly divine thing, the oneglimps of God's paradisegiven on earth, is to fight a losingbattle - and notlose it."
+
+text = "The oneperfectly divine thing, the oneglimpse of God's paradisegiven on earth, is to fight a losingbattle - and notlose it."
 print(insertspaces(text,word_list))
 
 
+
+"""
+PAGE 159: Phrase Completion
+
+To add phrase completion similar to google search engines do is supposedly simple according to this book... We use a corpus. But we are also interested in how the words fit together.
+
+In order to factor in how words fit together, we compile a list of n-grams from our corpus. An n-gram is simply a collection of n words that appear together.
+
+"""
+
+# Tokenizing and Getting N-grams
+# Tokenizing means splitting a string into its component words, ignoring punctuation.
+
+import requests
+file = requests.get('http://www.bradfordtuckfield.com/shakespeare.txt')
+file = file.text
+text = file.replace('\n', '')
+
+import nltk
+nltk.download('punkt')
+from nltk.util import ngrams
+token = nltk.word_tokenize(text)
+bigrams = ngrams(token,2)
+trigrams = ngrams(token,3)
+fourgrams = ngrams(token,4)
+fivegrams = ngrams(token,5)
+grams = [ngrams(token,2),ngrams(token,3),ngrams(token,4),ngrams(token,5)]
+
+"""
+PAGE 160: Our Strategy
+
+When a user types in a search, we check how many words are in their search. In other words, a user enters an n-gram and we determine what n is. Then we add to the n meaning we search for an n+1 gram.
+
+However not all suggestions are equally as good.So we can just suggest the n+1 gram that appears most frequently in our corpus.
+"""
+
+import requests
+file = requests.get('http://www.bradfordtuckfield.com/shakespeare.txt')
+file = file.text
+text = file.replace('\n', '')
+import nltk
+from nltk.util import ngrams
+from nltk.tokenize import sent_tokenize, word_tokenize
+from collections import Counter
+
+def search_suggestion(search_term, text):
+    token = nltk.word_tokenize(text)
+    bigrams = ngrams(token,2)
+    trigrams = ngrams(token,3)
+    fourgrams = ngrams(token,4)
+    fivegrams = ngrams(token,5)
+    grams = [bigrams,trigrams,fourgrams,fivegrams]
+    split_term = tuple(search_term.split(' '))
+    search_term_length = len(search_term.split(' '))
+    counted_grams = Counter(grams[search_term_length-1])
+    combined_term = "No suggested searches"
+    matching_terms = [element for element in list(counted_grams.items()) if element[0][:-1] == tuple(split_term)]
+    if(len(matching_terms) > 0):
+        frequencies = [item[1] for item in matching_terms]
+        maximum_frequency = np.max(frequencies)
+        highest_frequency_term = [item[0] for item in matching_terms if item[1] == maximum_frequency][0]
+        combined_term = ' '.join(highest_frequency_term)
+    return(combined_term)
+
+# Let's call our function:
+
+print(search_suggestion('life is a', text))
