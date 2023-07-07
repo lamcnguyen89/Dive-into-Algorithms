@@ -1,7 +1,7 @@
 # Chapter 01: Problem Solving with Algorithms
 
 # Problems can be solved Analytically or Algorithmically with a Computer.
-
+# Something Something Something
 """
 In the following examples we will be using first an Analytic Method and then an Algorithmic Method for solving the problem of catching a ball that's flying through the air.
 """
