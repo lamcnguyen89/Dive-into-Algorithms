@@ -9,6 +9,8 @@ The AI system that we will build will be able to play Dots and Boxes, a simple b
 4. Finally we'll introduce a minmax algorithm.
 """
 
+# Useless Comment
+
 # PAGE 187: Drawing the Board
 
 import matplotlib.pyplot as plt
