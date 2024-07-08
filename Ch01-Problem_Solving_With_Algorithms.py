@@ -6,7 +6,7 @@
 In the following examples we will be using first an Analytic Method and then an Algorithmic Method for solving the problem of catching a ball that's flying through the air.
 """
 
-"""The Analytic Approach to catching a ball:"""
+"""The Analytic Approach to catching a ball: Comment"""
 
 # Function for calculating the Trajectory of a ball:
 def ball_trajectory(x):
